@@ -83,6 +83,7 @@ add_link_options(
         -nostartfiles
         -Xlinker
         --gc-sections
+        -lm
         -Wl,--print-memory-usage
         -Wl,-Map,${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map
         --specs=nano.specs --specs=nosys.specs
