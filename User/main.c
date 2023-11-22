@@ -88,7 +88,6 @@ int main(void)
     //	printf("This is printf example\r\n");
 
     while (1) {
-        usb2uart_rx_handle();
         chry_dap_handle();
         chry_dap_usb2uart_handle();
     }

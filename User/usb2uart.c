@@ -1,6 +1,8 @@
 #include "usb2uart.h"
 
 uint8_t RxBuffer1[UART_DMA_BUF_LEN];
+//void USART3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void UART3_CfgInit(uint32_t baudrate, uint8_t stopbits, uint8_t parity);
 
 void DMA_INIT(void)
 {
@@ -25,7 +27,7 @@ void DMA_INIT(void)
     DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)(&USART3->DATAR);
     DMA_InitStructure.DMA_MemoryBaseAddr = (u32)RxBuffer1;
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-    DMA_InitStructure.DMA_BufferSize = 512;
+    DMA_InitStructure.DMA_BufferSize = UART_DMA_BUF_LEN;
     DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 
     DMA_Cmd(DMA1_Channel3, ENABLE);
@@ -71,6 +73,7 @@ void uartx_preinit(void)
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
     GPIO_InitTypeDef GPIO_InitStructure = { 0 };
+    uint16_t dat = dat;
 
     /* delete contains in ( ... )  */
     /* First set the serial port introduction to output high then close the TE and RE of CTLR1 register (note that USARTx->CTLR1 register setting 9 bits has a limit) */
@@ -110,30 +113,23 @@ void uartx_preinit(void)
     /* Enable USART2 */
     UART3_CfgInit(115200, 0, 0);
     USART_Cmd(USART3, ENABLE);
+    //    __enable_irq();
 }
+
+//void USART3_IRQHandler(void)
+//{
+//    if(USART_GetITStatus(USART3, USART_IT_RXNE) != RESET)
+//    {
+//        chry_ringbuffer_write_byte(&g_uartrx, USART_ReceiveData(USART3));
+//    }
+//    if(USART_GetFlagStatus(USART3, USART_IT_ORE) != RESET)
+//    {
+//        USART_ClearFlag(USART3, USART_FLAG_ORE);//���ORE��־λ
+//        USART_ReceiveData(USART3);             //�������յ�������
+//    }
+//}
 
 void chry_dap_usb2uart_uart_config_callback(struct cdc_line_coding *line_coding)
 {
     UART3_CfgInit(line_coding->dwDTERate, line_coding->bCharFormat, line_coding->bParityType);
-}
-
-void chry_dap_usb2uart_uart_send_bydma(uint8_t *data, uint16_t len)
-{
-    for (uint16_t index = 0; index < len; index++) {
-        while (USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET)
-            ;
-        USART_SendData(USART3, data[index]);
-    }
-    chry_dap_usb2uart_uart_send_complete(len);
-}
-
-void usb2uart_rx_handle(void)
-{
-    if (DMA_GetCurrDataCounter(DMA1_Channel3) < UART_DMA_BUF_LEN) {
-        DMA_Cmd(DMA1_Channel3, DISABLE);
-        chry_ringbuffer_write(&g_uartrx, RxBuffer1, UART_DMA_BUF_LEN - DMA_GetCurrDataCounter(DMA1_Channel3));
-        DMA_SetCurrDataCounter(DMA1_Channel3, UART_DMA_BUF_LEN);
-        USART_ClearFlag(USART3, USART_FLAG_ORE);
-        DMA_Cmd(DMA1_Channel3, ENABLE);
-    }
 }

@@ -1,6 +1,7 @@
 #include "dap_main.h"
 #include "DAP_config.h"
 #include "DAP.h"
+#include "usb2uart.h"
 
 #define DAP_IN_EP  0x81
 #define DAP_OUT_EP 0x02
@@ -266,6 +267,8 @@ static volatile uint8_t uarttx_idle_flag = 0;
 chry_ringbuffer_t g_uartrx;
 chry_ringbuffer_t g_usbrx;
 
+extern uint8_t RxBuffer1[512];
+
 void usbd_event_handler(uint8_t event)
 {
     switch (event) {
@@ -355,12 +358,12 @@ void usbd_cdc_acm_bulk_in(uint8_t ep, uint32_t nbytes)
         /* send zlp */
         usbd_ep_start_write(CDC_IN_EP, NULL, 0);
     } else {
-        if (chry_ringbuffer_get_used(&g_uartrx)) {
-            buffer = chry_ringbuffer_linear_read_setup(&g_uartrx, &size);
-            usbd_ep_start_write(CDC_IN_EP, buffer, size);
-        } else {
-            usbtx_idle_flag = 1;
-        }
+        //        if (chry_ringbuffer_get_used(&g_uartrx)) {
+        //            buffer = chry_ringbuffer_linear_read_setup(&g_uartrx, &size);
+        //            usbd_ep_start_write(CDC_IN_EP, buffer, size);
+        //        } else {
+        usbtx_idle_flag = 1;
+        //        }
     }
 }
 
@@ -542,6 +545,7 @@ void chry_dap_usb2uart_handle(void)
 {
     uint32_t size;
     uint8_t *buffer;
+    uint32_t index;
 
     if (config_uart) {
         /* disable irq here */
@@ -563,6 +567,13 @@ void chry_dap_usb2uart_handle(void)
      * becase we use dma and we do not want to use temp buffer to memcpy from ringbuffer
      * 
     */
+    if (DMA_GetCurrDataCounter(DMA1_Channel3) < UART_DMA_BUF_LEN) {
+        DMA_Cmd(DMA1_Channel3, DISABLE);
+        chry_ringbuffer_write(&g_uartrx, RxBuffer1, UART_DMA_BUF_LEN - DMA_GetCurrDataCounter(DMA1_Channel3));
+        DMA_SetCurrDataCounter(DMA1_Channel3, UART_DMA_BUF_LEN);
+        USART_ClearFlag(USART3, USART_FLAG_ORE);
+        DMA_Cmd(DMA1_Channel3, ENABLE);
+    }
 
     /* uartrx to usb tx */
     if (usbtx_idle_flag) {
@@ -575,13 +586,15 @@ void chry_dap_usb2uart_handle(void)
     }
 
     /* usbrx to uart tx */
-    if (uarttx_idle_flag) {
-        if (chry_ringbuffer_get_used(&g_usbrx)) {
-            uarttx_idle_flag = 0;
-            /* start first transfer */
-            buffer = chry_ringbuffer_linear_read_setup(&g_usbrx, &size);
-            chry_dap_usb2uart_uart_send_bydma(buffer, size);
+    if (chry_ringbuffer_get_used(&g_usbrx)) {
+        /* start first transfer */
+        buffer = chry_ringbuffer_linear_read_setup(&g_usbrx, &size);
+        for (index = 0; index < size; index++) {
+            while (USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET)
+                ;
+            USART_SendData(USART3, buffer[index]);
         }
+        chry_ringbuffer_linear_read_done(&g_usbrx, size);
     }
 
     /* check whether usb rx ringbuffer have space to store */
