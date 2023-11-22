@@ -2,7 +2,7 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 cmake_minimum_required(VERSION 3.26)
 
-set(CROSS_COMPILE "riscv-none-embed-")
+set(CROSS_COMPILE "riscv-none-elf-")
 # specify cross-compilers and tools
 set(CMAKE_C_COMPILER ${CROSS_COMPILE}gcc)
 set(CMAKE_CXX_COMPILER ${CROSS_COMPILE}g++)
@@ -55,7 +55,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     message(STATUS "Maximum optimization for speed")
     # flto
 #    add_compile_options(-flto)
-    add_compile_options(-O3)
+    add_compile_options(-O3 -g)
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
     message(STATUS "Maximum optimization for speed, debug info included")
     add_compile_options(-Ofast -g)
