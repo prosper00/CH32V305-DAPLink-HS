@@ -54,7 +54,7 @@ file(GLOB_RECURSE SOURCES
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     message(STATUS "Maximum optimization for speed")
     # flto
-#    add_compile_options(-flto)
+    add_compile_options(-flto)
     add_compile_options(-O3 -g)
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
     message(STATUS "Maximum optimization for speed, debug info included")
