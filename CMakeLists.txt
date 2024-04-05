@@ -2,7 +2,8 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 cmake_minimum_required(VERSION 3.26)
 
-set(CROSS_COMPILE "riscv-none-elf-")
+set(CROSS_COMPILE "riscv64-unknown-elf-")
+set(CROSS_COMPILE "~/Embedded/ch32v-base/MounRiver_Studio_Community_Linux_x64_V170/MRS_Community/toolchain/RISC-V Embedded GCC 12/bin/riscv-none-elf-")
 # specify cross-compilers and tools
 set(CMAKE_C_COMPILER ${CROSS_COMPILE}gcc)
 set(CMAKE_CXX_COMPILER ${CROSS_COMPILE}g++)
