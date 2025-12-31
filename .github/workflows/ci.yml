@@ -1,0 +1,37 @@
+name: CH32V305_DAP
+
+on:
+  push:
+
+jobs:
+
+  generate-fabrication-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Prerequirements
+        run: |
+          sudo apt update
+          sudo apt-get install autoconf automake autotools-dev curl python3 python3-pip python3-tomli libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build git cmake libglib2.0-dev libslirp-dev libncurses-dev
+      
+      - name: Clone and build RISC-V GNU Compiler Toolchain
+        run: |
+          git clone https://github.com/riscv/riscv-gnu-toolchain
+          cd riscv-gnu-toolchain
+          ./configure --prefix=/opt/riscv --disable-linux --with-abi=ilp32 --with-arch=rv32imac_zicsr
+          sudo make -j $(nproc)
+          cd ..
+
+      - name: Build project with CMake
+        run: |
+          cmake -S . -B build
+          cmake --build build
+        
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: ./build
