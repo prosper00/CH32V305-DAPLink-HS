@@ -21,14 +21,13 @@ jobs:
         run: |
           git clone https://github.com/riscv/riscv-gnu-toolchain
           cd riscv-gnu-toolchain
-          git reset --hard a56ebafcaaf5bbe5086aa222b0e0abb938134315
           ./configure --prefix=/opt/riscv --disable-linux --with-abi=ilp32 --with-arch=rv32imac_zicsr
           sudo make -j $(nproc)
-          export PATH=/opt/riscv/bin:$PATH
           cd ..
 
       - name: Build project with CMake
         run: |
+          export PATH=/opt/riscv/bin:$PATH
           cmake -S . -B build
           cmake --build build
         
