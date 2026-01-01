@@ -3,25 +3,21 @@ Alternate firmware for the WCH-LinkE - enable ARM DAP debugging in USB-2.0 High 
 
 Supports SWD clock speed up to 10MHz - flash speed of >100kB/s. 
 
-See https://oshwhub.com/fanhuacloud/wch-linke/ for details and instructions (machine-translated: https://oshwhub-com.translate.goog/fanhuacloud/wch-linke?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=en&_x_tr_pto=wapp )
+See https://oshwhub.com/fanhuacloud/wch-linke/ for details and instructions (machine-translated: https://oshwhub-com.translate.goog/fanhuacloud/wch-linke?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=en&_x_tr_pto=wapp)
 
-Binaries included. Flash them to a WCH-LinkE probe: push the 'IAP' button and then plug in the probe. Then flash it using the [wchisp](https://github.com/ch32-rs/wchisp) tool, or [wlink](https://github.com/ch32-rs/wlink)
+Binaries included. Flash them to a WCH-LinkE probe: push the 'IAP' button and then plug in the probe. Then flash it using the [wchisp](https://github.com/ch32-rs/wchisp) tool, or [wlink](https://github.com/ch32-rs/wlink).
 
-Fork from https://gitee.com/fhcloud/ch32v305_dap/
+Forked from https://gitee.com/fhcloud/ch32v305_dap/
 
 # Build
 
-1. Install [RISC-V GNU Compiler Toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) for Newlib with `--disable-linux -march=rv32imac_zicsr -mabi=ilp32`.
+1. Install [MRS Toolchain](https://github.com/ch32-riscv-ug/MounRiver_Studio_Community_miror) from mirror.
 ```bash
-sudo apt-get update
-sudo apt-get install autoconf automake autotools-dev curl python3 python3-pip python3-tomli libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build git cmake libglib2.0-dev libslirp-dev libncurses-dev
-
-git clone https://github.com/riscv/riscv-gnu-toolchain
-cd riscv-gnu-toolchain
-
-./configure --prefix=/opt/riscv --disable-linux --with-abi=ilp32 --with-arch=rv32imac_zicsr
-sudo make -j $(nproc)
-
+curl -OL "https://github.com/ch32-riscv-ug/MounRiver_Studio_Community_miror/releases/download/1.92-toolchain/MRS_Toolchain_Linux_x64_V1.92.tar.xz"
+tar -xf MRS_Toolchain_Linux_x64_V1.92.tar.xz
+sudo cp -r "MRS_Toolchain_Linux_x64_V1.92/RISC-V_Embedded_GCC12" "/opt/riscv/"
+rm MRS_Toolchain_Linux_x64_V1.92.tar.xz
+rm -r MRS_Toolchain_Linux_x64_V1.92
 export PATH=/opt/riscv/bin:$PATH
 ```
 
