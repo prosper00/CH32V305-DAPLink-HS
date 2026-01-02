@@ -1,0 +1,40 @@
+name: CH32V305_DAP
+
+on:
+  push:
+
+jobs:
+
+  generate-binaries:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Prerequirements
+        run: |
+          sudo apt update
+          sudo apt install tar cmake curl
+      
+      - name: Install RISC-V GNU Compiler Toolchain
+        run: |
+          curl -OL "https://github.com/ch32-riscv-ug/MounRiver_Studio_Community_miror/releases/download/1.92-toolchain/MRS_Toolchain_Linux_x64_V1.92.tar.xz"
+          tar -xf MRS_Toolchain_Linux_x64_V1.92.tar.xz
+          sudo cp -r "MRS_Toolchain_Linux_x64_V1.92/RISC-V_Embedded_GCC12" "/opt/riscv/"
+          rm MRS_Toolchain_Linux_x64_V1.92.tar.xz
+          rm -r MRS_Toolchain_Linux_x64_V1.92
+
+      - name: Build project with CMake
+        run: |
+          export PATH=/opt/riscv/bin:$PATH
+          cmake -S . -B build
+          cmake --build build
+          rm -r build/CMakeFiles
+          rm build/CMakeCache.txt build/cmake_install.cmake build/Makefile
+        
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: ./build

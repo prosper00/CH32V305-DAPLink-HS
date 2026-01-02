@@ -2,8 +2,7 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 cmake_minimum_required(VERSION 3.26)
 
-set(CROSS_COMPILE "riscv64-unknown-elf-")
-set(CROSS_COMPILE "~/Embedded/ch32v-base/MounRiver_Studio_Community_Linux_x64_V170/MRS_Community/toolchain/RISC-V Embedded GCC 12/bin/riscv-none-elf-")
+set(CROSS_COMPILE "riscv-none-elf-")
 # specify cross-compilers and tools
 set(CMAKE_C_COMPILER ${CROSS_COMPILE}gcc)
 set(CMAKE_CXX_COMPILER ${CROSS_COMPILE}g++)
@@ -19,7 +18,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/Ld/Link.ld)
-add_compile_options(-march=rv32imacxw -mabi=ilp32 -msmall-data-limit=8 -msave-restore)
+add_compile_options(-march=rv32imac_zicsr -mabi=ilp32 -msmall-data-limit=8 -msave-restore)
 
 include_directories(
         "Core"
@@ -79,7 +78,7 @@ add_compile_options(
 )
 
 add_link_options(
-        -march=rv32imacxw -mabi=ilp32
+        -march=rv32imac_zicsr -mabi=ilp32
         -T ${LINKER_SCRIPT}
         -nostartfiles
         -Xlinker
